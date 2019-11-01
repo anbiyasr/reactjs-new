@@ -1,15 +1,32 @@
 import React, {Component} from 'react';
 import './Create.css';
-// import Show from "./Show";
-// import Home from "./Home";
-// import Table from "./Table";
+
+
+
+
+const emailRegex = RegExp(
+  /^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/
+);
+
+const formValid = ({ formErrors, ...rest }) => {
+  let valid = true;
+
+  // validate form errors being empty
+  Object.values(formErrors).forEach(val => {
+    val.length > 0 && (valid = false);
+  });
+
+  // validate the form was filled out
+  Object.values(rest).forEach(val => {
+    val === null && (valid = false);
+  });
+
+  return valid;
+};
 
 class Create extends Component {
 
-  // constructor(props){
-  //   super(props)
-
-  // }
+  
 
   state = {
     nama: '',
@@ -17,10 +34,13 @@ class Create extends Component {
     tahunLahir:'',
     tempatLahir:'',
     data: [],
-    // ping: false
+    formErrors: {
+      nama: "",
+      alamat: "",
+      tahunLahir: "",
+      tempatLahir: ""
+    }
 
-    // kode : '',
-    // showComponent: true
   }
   
   handleSubmit = e => {
@@ -33,7 +53,7 @@ class Create extends Component {
     }
     else{
       this.setState({
-        // ping : !this.state.ping,
+
         data : [...this.state.data,
           {
             nama: this.state.nama,
@@ -44,26 +64,50 @@ class Create extends Component {
         ]
       },alert('berhasil menyimpan'))
     }
-    // this.storage,
+
      
 
   }
 
   storage = e => {
-    // this.setState({
-      // ping : false
-    // })
+
     localStorage.setItem("data", JSON.stringify(this.state.data))
   }
 
   handleChange = e => {
     e.preventDefault();
-    const {name , value} = e.target
-    this.setState({
-      [name]: value }
-      )
+    const { name, value } = e.target;
+    let formErrors = { ...this.state.formErrors };
+    switch (name) {
+      case "nama":
+        formErrors.nama =
+          value.length < 3 ? "minimal 3 karakter" : "";
+        break;
+      case "alamat":
+        formErrors.alamat =
+          value.length < 3 ? "minimal 3 karakter" : "";
+        break;
+      case "tahunLahir":
+        formErrors.tahunLahir =
+          value.length < 1 ? "*wajib di isi" : "";
+        break;
+      case "tempatLahir":
+        formErrors.tempatLahir =
+          value.length < 3 ? "minimal 3 karakter" : "";
+        break;
+      default:
+        break;
+    }
 
-  }
+    this.setState({ formErrors, [name]: value }, () => console.log(this.state));
+  };
+
+  //   const {name , value} = e.target
+  //   this.setState({
+  //     [name]: value }
+  //     )
+
+  // }
 
   handleDel = e => {
     e.preventDefault();
@@ -76,24 +120,21 @@ class Create extends Component {
 
   componentDidMount(){
     console.log('didmount')
-    // let data = localStorage.getItem("data") 
-    // ? JSON.parse(localStorage.getItem("data")) : []
+
     this.setState({data: JSON.parse(localStorage.getItem("data"))})
   }
 
   componentDidUpdate(){
     console.log('didupdate')
-    // if (this.state.ping === true) {
+
       this.storage();
-    // } 
-    // else{
-      // this.setState({data: localStorage.getItem("data")})
-    // }
+
 
     
   }
 
   render() {
+    const { formErrors } = this.state;
     console.log('render')
     return <div className="wrapper">
       <div className="form-wrapper">
@@ -103,45 +144,57 @@ class Create extends Component {
             <label htmlFor="firstName"> Name </label>
             <input 
             type="text"
-            className="nama" 
+            className={formErrors.nama.length > 0 ? "error" : null} 
             placeholder="Masukan Nama" 
             name="nama" 
             noValidate 
             onChange={this.handleChange}
             />
+            {formErrors.nama.length > 0 && (
+                <span className="errorMessage">{formErrors.nama}</span>
+              )}
           </div>
           <div className="address">
             <label htmlFor="address">Alamat</label>
             <input 
             type="text"
-            className="" 
+            className={formErrors.alamat.length > 0 ? "error" : null}
             placeholder="Masukan Alamat" 
             name="alamat" 
             noValidate 
             onChange={this.handleChange}
             />
+            {formErrors.alamat.length > 0 && (
+                <span className="errorMessage">{formErrors.alamat}</span>
+              )}
           </div>
           <div className="email">
             <label htmlFor="email">Tahun Lahir</label>
             <input 
             type="number"
-            className="" 
+            className={formErrors.tahunLahir.length > 0 ? "error" : null} 
             placeholder="Masukan Tahun Kelahiran" 
             name="tahunLahir" 
             noValidate 
             onChange={this.handleChange}
             />
+            {formErrors.tahunLahir.length > 0 && (
+                <span className="errorMessage">{formErrors.tahunLahir}</span>
+              )}
           </div>
           <div className="email">
             <label htmlFor="email">Tempat Lahir</label>
             <input 
             type="text"
-            className="" 
+            className={formErrors.tempatLahir.length > 0 ? "error" : null}
             placeholder="Masukan Tempat Lahir" 
             name="tempatLahir" 
             noValidate 
             onChange={this.handleChange}
             />
+            {formErrors.tempatLahir.length > 0 && (
+                <span className="errorMessage">{formErrors.tempatLahir}</span>
+              )}
           </div>
           <div className="createAccount">
             <button type="submit" onClick={this.handleSubmit}> SIMPAN </button>
